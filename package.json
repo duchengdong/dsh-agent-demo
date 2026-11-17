@@ -1,0 +1,14 @@
+{
+  "name": "dsh-agent-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demo service for DeepSeek Harness Superagent testing",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  }
+}
