@@ -38,6 +38,23 @@ curl -i http://127.0.0.1:9090/api/users/1
 # {"id":1,"username":"demo","displayName":"Demo User","enabled":true}
 ```
 
+## Java Mapper 演示
+
+Mapper 层位于 `src/main/java/com/example/demo/mapper/UserMapper.java`，用 `LinkedHashMap` 模拟一张用户表，提供 `User` 实体的增删改查：
+
+- `insert(User)`：插入记录，未设置主键时自动分配自增主键，显式主键重复时抛出 `IllegalArgumentException`。
+- `findById(long)` / `findAll()`：按主键或按插入顺序查询。
+- `update(User)` / `deleteById(long)`：按主键更新或删除，记录不存在时返回 `false`。
+- `count()`：返回当前记录数；所有方法均加锁，可被多线程安全共享。
+
+示例：
+
+```java
+UserMapper mapper = new UserMapper();
+User user = mapper.insert(new User(null, "demo", "Demo User", true)); // id = 1
+mapper.findById(user.getId());                                          // Optional[User{...}]
+```
+
 ### 测试
 
 ```bash
