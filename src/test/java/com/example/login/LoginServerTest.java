@@ -23,12 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LoginServerTest {
 
     private LoginServer server;
+    private UserStore users;
     private String baseUrl;
 
     @BeforeEach
     void setUp() throws IOException {
+        users = UserStore.withDemoUsers();
         server = new LoginServer(new InetSocketAddress("127.0.0.1", 0),
-                UserStore.withDemoUsers(), new SessionStore());
+                users, new SessionStore());
         server.start();
         baseUrl = "http://127.0.0.1:" + server.port();
     }
@@ -89,6 +91,24 @@ class LoginServerTest {
         Response response = request("POST", "/api/login",
                 "{\"username\":1,\"password\":\"demo123\"}", null);
         assertEquals(400, response.status);
+    }
+
+    @Test
+    void loginAcceptsUsernameAtLengthLimit() throws IOException {
+        String username = repeat('a', LoginServer.MAX_USERNAME_LENGTH);
+        users.add(username, "password1", "Long User");
+
+        Response response = login(username, "password1");
+        assertEquals(200, response.status);
+        assertEquals(username, field(response.body, "username"));
+    }
+
+    @Test
+    void loginRejectsUsernameLongerThanLimit() throws IOException {
+        String username = repeat('a', LoginServer.MAX_USERNAME_LENGTH + 1);
+        Response response = login(username, "demo123");
+        assertEquals(400, response.status);
+        assertEquals("invalid_request", Json.parseFlatStringObject(response.body).get("error"));
     }
 
     @Test
@@ -159,6 +179,14 @@ class LoginServerTest {
         int end = json.indexOf('"', start);
         assertTrue(end > start, "malformed field " + name + " in " + json);
         return json.substring(start, end);
+    }
+
+    private static String repeat(char c, int count) {
+        StringBuilder sb = new StringBuilder(count);
+        for (int i = 0; i < count; i++) {
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     private Response login(String username, String password) throws IOException {

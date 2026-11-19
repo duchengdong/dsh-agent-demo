@@ -26,6 +26,7 @@ import java.util.Optional;
  */
 public final class LoginServer {
 
+    static final int MAX_USERNAME_LENGTH = 100;
     private static final int MAX_BODY_BYTES = 8 * 1024;
 
     private final HttpServer http;
@@ -118,6 +119,12 @@ public final class LoginServer {
         }
 
         username = username.trim();
+        if (username.length() > MAX_USERNAME_LENGTH) {
+            sendJson(exchange, 400,
+                    error("invalid_request", "username must be at most "
+                            + MAX_USERNAME_LENGTH + " characters"));
+            return;
+        }
         if (!users.authenticate(username, password)) {
             sendJson(exchange, 401,
                     error("invalid_credentials", "invalid username or password"));

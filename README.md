@@ -73,7 +73,7 @@ curl -i -X POST http://127.0.0.1:8080/api/logout \
 # HTTP/1.1 204 No Content
 ```
 
-`/api/login` 仅接受 `Content-Type: application/json` 的请求体；`/api/me`、`/api/logout` 需要 Bearer Token。
+`/api/login` 仅接受 `Content-Type: application/json` 的请求体；用户名最长 100 个字符，超长返回 400。`/api/me`、`/api/logout` 需要 Bearer Token。
 
 ### 说明与限制
 
